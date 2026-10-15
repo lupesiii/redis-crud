@@ -2,6 +2,7 @@ from InquirerPy import inquirer
 from rich.table import Table
 from InquirerPy.base.control import Choice
 
+from db.login import loginUsuario, verificarSessao
 from db.produtos import (
     atualizarProdutoRedis,
     buscarProdutos,
@@ -106,6 +107,8 @@ def selecionarVendedor():
 
 
 def main():
+    token = loginUsuario()
+
     try:
         while True:
             opcao = inquirer.select(
@@ -129,10 +132,14 @@ def main():
 
             match opcao:
                 case 1:
-                    nomeLoja = inquirer.text(
-                        message="Nome da Loja", validate=verificarVazio
-                    ).execute()
+                    if not verificarSessao(token):
+                        loginUsuario()
+
                     try:
+                        nomeLoja = inquirer.text(
+                            message="Nome da Loja", validate=verificarVazio
+                        ).execute()
+
                         produtos = cadastrarProduto(nomeLoja)
 
                         console.print(
@@ -143,12 +150,18 @@ def main():
                         print(e)
 
                 case 2:
+                    if not verificarSessao(token):
+                        loginUsuario()
+
                     try:
                         mostrarProdutos(listarProdutosRedis())
                     except ErroException as e:
                         print(e)
 
                 case 3:
+                    if not verificarSessao(token):
+                        loginUsuario()
+
                     produtoId = inquirer.text(
                         message="ID do produto:", validate=verificarVazio
                     ).execute()
@@ -160,6 +173,9 @@ def main():
                             print(e)
 
                 case 4:
+                    if not verificarSessao(token):
+                        loginUsuario()
+
                     try:
                         produtoId = selecionarProduto()
 
